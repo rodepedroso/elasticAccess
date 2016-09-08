@@ -85,7 +85,7 @@ GET cli_p3/_search
 }
 
 # Consulta funciona (como usamos na access)
-# Mas para alguns casos não funcionou.
+# Mas para alguns casos daqui não funcionou (infelizmente aqui no exemplo todos funcionaram)
 GET cli_p3/registro/_search
 {
   "query": {
@@ -101,10 +101,5 @@ GET cli_p3/registro/_search
 }
 
 # Fiz o teste de força a atualizar o registro manualmento no marvel.
-POST cli_p3/registro/3
-{
-  "metaDados": {
-    "contrato": 20005741
-  }
-}
-# Após isso,  a consulta funciona listando os registro.
+# Fiz um post novamente sem alterar nenhum dos valores dos campos.
+# Após isso, a consulta funciona listando os registro.
