@@ -1,0 +1,110 @@
+
+
+PUT /_template/p3clientes
+{
+  "template": "customers*",
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1,
+    "analysis": {
+      "filter": {
+        "brazilian_stop": {
+          "type": "stop",
+          "stopwords": "_brazilian_"
+        }
+      },
+      "analyzer": {
+        "analyzer_fulltext": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "brazilian_stop",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  }
+}
+
+# Mapeamento correto (novo mapeamento)
+POST cli_p3
+{
+  "mappings": {
+    "registro": {
+      "properties": {
+        "metaDados": {
+          "properties": {
+            "contrato": {
+              "type": "double",
+              "fields": {
+                "analyzed": {
+                  "type": "string",
+                  "analyzer": "standard"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+POST cli_p3/registro/1
+{
+  "metaDados": {
+    "contrato": 20005740
+  }
+}
+
+POST cli_p3/registro/2
+{
+  "metaDados": {
+    "contrato": 20005739
+  }
+}
+
+POST cli_p3/registro/3
+{
+  "metaDados": {
+    "contrato": 20005741
+  }
+}
+
+
+# Consulta funciona (exemplo da consultoria)
+GET cli_p3/_search
+{
+  "query": {
+    "query_string": {
+      "default_field": "metaDados.contrato",
+      "query": 20005741
+    }
+  }
+}
+
+# Consulta funciona (como usamos na access)
+# Mas para alguns casos não funcionou.
+GET cli_p3/registro/_search
+{
+  "query": {
+    "query_string": {
+      "fields": [
+        "metaDados.contrato.analyzed"
+      ],
+      "query": "*20005741*",
+      "analyzer": "analyzer_fulltext",
+      "analyze_wildcard": true
+    }
+  }
+}
+
+# Fiz o teste de força a atualizar o registro manualmento no marvel.
+POST cli_p3/registro/3
+{
+  "metaDados": {
+    "contrato": 20005741
+  }
+}
+# Após isso,  a consulta funciona listando os registro.
